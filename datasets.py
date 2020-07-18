@@ -6,7 +6,7 @@ import shutil
 
 
 class N2CDataset(torch.utils.data.Dataset):
-    def __init__(self, dataset_path, mode, inC, sigma, transform=None):
+    def __init__(self, dataset_path, mode, inC, sigma, transform, data_path=None):
         self.mode = mode
         if inC == 1:
             self.grayscale = True
@@ -45,7 +45,7 @@ class N2CDataset(torch.utils.data.Dataset):
                 else:
                     self.data.append(f)
 
-        else:
+        elif self.mode == 'test':
             self.dataset_path = dataset_path + '/test/'
 
             self.data = []
@@ -55,19 +55,25 @@ class N2CDataset(torch.utils.data.Dataset):
                 else:
                     self.data.append(f)
 
+        else:
+            sef.data_path = data_path
+
     def __len__(self):
         if self.mode == 'train':
             return self.train_num
-        else:
+        elif self.mode == 'test':
             return self.test_num
 
     def __getitem__(self, idx):
+        if self.mode == 'train' or self.mode == 'test':
+            self.data_path = self.dataset_path + self.data[idx]
+
         if self.grayscale:
-            teach_img = cv2.imread(self.dataset_path + self.data[idx], cv2.IMREAD_GRAYSCALE)/255
+            teach_img = cv2.imread(self.data_path, cv2.IMREAD_GRAYSCALE)/255
             teach_img = numpy.reshape(teach_img,(teach_img.shape[0], teach_img.shape[1], 1))
             target_img = teach_img + (self.sigma/255) * numpy.random.randn(*teach_img.shape)
         else:
-            teach_img = cv2.imread(self.dataset_path + self.data[idx])/255
+            teach_img = cv2.imread(self.data_path)/255
             target_img = teach_img + (self.sigma/255) * numpy.random.randn(*teach_img.shape)
 
         sample = {'teach_img':teach_img, 'target_img':target_img}
