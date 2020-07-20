@@ -69,11 +69,19 @@ class UNetUp(nn.Module):
         self.bn2 = nn.BatchNorm2d(outC)
 
     def forward(self, x1, x2):
-        x1, x2 = adjust(x1, x2)
+        x1, x2 = self.adjust(x1, x2)
         x = torch.cat([x1, x2], 1)
         x = F.relu(self.bn1(self.conv1(x)))
         x = F.relu(self.bn2(self.conv2(x)))
         return x
+
+    def adjust(self, x1, x2):
+        if (x1.size(2) != x2.size(2)) or (x1.size(3) != x2.size(3)):
+            min2 = min(x2.size(2), x1.size(2))
+            min3 = min(x2.size(3), x1.size(3))
+            x1 = x1[:, :, :min2, :min3]
+            x2 = x2[:, :, :min2, :min3]
+        return x1, x2
 
 class UNetConv(nn.Module):
     def __init__(self, inC, outC, kernel_size, padding):
