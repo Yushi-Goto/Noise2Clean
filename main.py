@@ -19,6 +19,7 @@ def parse_args():
     parser.add_argument('--learning-rate', type=float, default=0.01, help='learning rate (default: 0.01)')
     parser.add_argument('--model-path', default='./N2CModel.pht', help='save model path (default: ./N2CModel.pht)')
     parser.add_argument('--no-cuda', action='store_true', default=False, help='disables CUDA training')
+    parser.add_argument('--no-rf', action='store_true', help='Do not RotateFlip transform')
     parser.add_argument('--lpfir', action='store_true', help='Linear Phase FIR Filter or NORMAL Filter')
 
     return parser.parse_args()
@@ -31,8 +32,8 @@ def main():
     device = torch.device('cuda' if use_cuda else 'cpu')
 
     if args.mode == 'train':
-        param = {'device':device, 'mode':args.mode, 'model_path':args.model_path, 'dataset_path':args.dataset_path, 'inC':args.inC,
-            'midC':args.midC, 'img_size':args.img_size, 'sigma':args.sigma, 'batch_size':args.batch_size, 'lr':args.learning_rate, 'lpfir':args.lpfir}
+        param = {'device':device, 'mode':args.mode, 'model_path':args.model_path, 'dataset_path':args.dataset_path, 'inC':args.inC, 'midC':args.midC,
+            'img_size':args.img_size, 'sigma':args.sigma, 'batch_size':args.batch_size, 'lr':args.learning_rate, 'lpfir':args.lpfir, 'no_rf':args.no_rf}
         model = models.N2CModel(param)
         model.train(args.epochs, args.lpfir)
 
