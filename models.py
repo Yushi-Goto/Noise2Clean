@@ -20,7 +20,7 @@ class N2CModel(object):
         if param['mode'] == 'train':
             self.batch_size = param['batch_size']
 
-            if param['lpfir']:
+            if param['lpfir'] or param['no_rf']:
                 self.train_data_transform = transforms.Compose([
                     util.transforms.Resize(param['img_size'], param['inC']),
                     util.transforms.AddNoise(param['sigma']),
@@ -156,23 +156,20 @@ class N2CModel(object):
     def over_write_forward(self):
         param_dic = self.net.state_dict()
         for name in self.param_conv:
-            print('name : {}'.format(name))
             shape = param_dic[name].shape
-            print("shape : {}".format(shape))
 
             if not ((shape[2] == 1) or (shape[3] == 1)):
                 param_dic[name][:, :, (shape[2]+1)//2:shape[2], :] = param_dic[name][:, :, torch.arange((shape[2]+1)//2-1-1, 0-1, -1), :]
                 param_dic[name][:, :, :, (shape[3]+1)//2:shape[3]] = param_dic[name][:, :, :, torch.arange((shape[3]+1)//2-1-1, 0-1, -1)]
 
         param_dic.update(param_dic)
-        self.net = self.net.load_state_dict(param_dic)
+        self.net.load_state_dict(param_dic)
 
     def over_write_backward(self):
         for n, p in self.net.named_parameters():
             if n in self.param_conv:
                 shape = p.shape
                 radius = shape[2] // 2
-                print(p.requires_grad)
 
                 for y in range(radius):
                     for x in range(radius):
@@ -206,5 +203,3 @@ class N2CModel(object):
         for name in param_dic.keys():
             if not (('bias' in name) or ('bn' in name) or ('deconv' in name)):
                 self.param_conv.append(name)
-        print(param_dic.keys())
-        print(self.param_conv)
