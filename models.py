@@ -93,7 +93,7 @@ class N2CModel(object):
             train_loss_list.append(train_loss / len(self.train_dataset))
 
         self.save_model()
-        self.plot_loss(epochs, train_loss_list)
+        self.plot_train_loss(epochs, train_loss_list)
         print('finished training')
         print('last trainning loss : {}'.format(train_loss_list[-1]))
 
@@ -135,7 +135,7 @@ class N2CModel(object):
         """Load model from self.model_path"""
         self.net.load_state_dict(torch.load(self.model_path, map_location=self.device))
 
-    def plot_loss(self, epochs, loss_list):
+    def plot_train_loss(self, epochs, loss_list):
         plt.figure()
         plt.plot(range(epochs), loss_list, color='blue', linestyle='-', label='train_loss')
         plt.legend()
