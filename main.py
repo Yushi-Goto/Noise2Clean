@@ -1,6 +1,8 @@
 import os
 import torch
+import numpy
 import argparse
+import random
 import models
 
 
@@ -27,6 +29,12 @@ def parse_args():
 
 def main():
     args = parse_args()
+
+    seed = 1
+    random.seed(seed)
+    numpy.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.backends.cudnn.deterministic = True
 
     use_cuda = not args.no_cuda and torch.cuda.is_available()
     device = torch.device('cuda' if use_cuda else 'cpu')
